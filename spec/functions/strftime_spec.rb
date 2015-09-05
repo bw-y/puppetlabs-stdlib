@@ -1,6 +1,9 @@
+#! /usr/bin/env ruby -S rspec
 require 'spec_helper'
 
-describe 'strftime' do
+describe "the strftime function" do
+  let(:scope) { PuppetlabsSpec::PuppetInternals.scope }
+
   it "should exist" do
     expect(Puppet::Parser::Functions.function("strftime")).to eq("function_strftime")
   end

@@ -37,17 +37,18 @@ Will return: [0,2,4,6,8]
     EOS
   ) do |arguments|
 
-    raise(Puppet::ParseError, 'range(): Wrong number of ' +
-      'arguments given (0 for 1)') if arguments.size == 0
+    # We support more than one argument but at least one is mandatory ...
+    raise(Puppet::ParseError, "range(): Wrong number of " +
+      "arguments given (#{arguments.size} for 1)") if arguments.size < 1
 
     if arguments.size > 1
       start = arguments[0]
       stop  = arguments[1]
       step  = arguments[2].nil? ? 1 : arguments[2].to_i.abs
 
-      type = '..' # Use the simplest type of Range available in Ruby
+      type = '..' # We select simplest type for Range available in Ruby ...
 
-    else # arguments.size == 1
+    elsif arguments.size > 0
       value = arguments[0]
 
       if m = value.match(/^(\w+)(\.\.\.?|\-)(\w+)$/)
@@ -55,16 +56,16 @@ Will return: [0,2,4,6,8]
         stop  = m[3]
 
         type = m[2]
-        step = 1
+
       elsif value.match(/^.+$/)
-        raise(Puppet::ParseError, "range(): Unable to compute range " +
-          "from the value: #{value}")
+        raise(Puppet::ParseError, 'range(): Unable to compute range ' +
+          'from the value given')
       else
-        raise(Puppet::ParseError, "range(): Unknown range format: #{value}")
+        raise(Puppet::ParseError, 'range(): Unknown format of range given')
       end
     end
 
-    # If we were given an integer, ensure we work with one
+    # Check whether we have integer value if so then make it so ...
     if start.to_s.match(/^\d+$/)
       start = start.to_i
       stop  = stop.to_i
@@ -75,10 +76,10 @@ Will return: [0,2,4,6,8]
 
     range = case type
       when /^(\.\.|\-)$/ then (start .. stop)
-      when '...'         then (start ... stop) # Exclusive of last element
+      when /^(\.\.\.)$/  then (start ... stop) # Exclusive of last element ...
     end
 
-    result = range.step(step).to_a
+    result = range.step(step).collect { |i| i } # Get them all ... Pokemon ...
 
     return result
   end

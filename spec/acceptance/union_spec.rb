@@ -6,10 +6,9 @@ describe 'union function', :unless => UNSUPPORTED_PLATFORMS.include?(fact('opera
     it 'unions arrays' do
       pp = <<-EOS
       $a = ["the","public"]
-      $b = ["art"]
-      $c = ["galleries"]
+      $b = ["art","galleries"]
       # Anagram: Large picture halls, I bet
-      $o = union($a,$b,$c)
+      $o = union($a,$b)
       notice(inline_template('union is <%= @o.inspect %>'))
       EOS
 

@@ -1,14 +1,24 @@
+#! /usr/bin/env ruby -S rspec
 require 'spec_helper'
 
-describe 'parseyaml' do
-  it { is_expected.not_to eq(nil) }
-  it { is_expected.to run.with_params().and_raise_error(Puppet::ParseError, /wrong number of arguments/i) }
-  it { is_expected.to run.with_params('', '').and_raise_error(Puppet::ParseError, /wrong number of arguments/i) }
-  it { is_expected.to run.with_params('["one", "two", "three"]').and_return(['one', 'two', 'three']) }
-  context 'when running on modern rubies', :unless => RUBY_VERSION == '1.8.7' do
-    it { is_expected.to run.with_params('["one"').and_raise_error(Psych::SyntaxError) }
+describe "the parseyaml function" do
+  let(:scope) { PuppetlabsSpec::PuppetInternals.scope }
+
+  it "should exist" do
+    expect(Puppet::Parser::Functions.function("parseyaml")).to eq("function_parseyaml")
   end
-  context 'when running on ruby 1.8.7, which does not have Psych', :if => RUBY_VERSION == '1.8.7' do
-    it { is_expected.to run.with_params('["one"').and_raise_error(ArgumentError) }
+
+  it "should raise a ParseError if there is less than 1 arguments" do
+    expect { scope.function_parseyaml([]) }.to( raise_error(Puppet::ParseError))
+  end
+
+  it "should convert YAML to a data structure" do
+    yaml = <<-EOS
+- aaa
+- bbb
+- ccc
+EOS
+    result = scope.function_parseyaml([yaml])
+    expect(result).to(eq(['aaa','bbb','ccc']))
   end
 end

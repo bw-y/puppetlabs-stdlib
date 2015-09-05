@@ -13,12 +13,9 @@ end
 group :development, :unit_tests do
   gem 'rake', '~> 10.1.0',       :require => false
   gem 'rspec', '~> 3.1.0',       :require => false
-  gem 'rspec-puppet', '~> 2.2',  :require => false
-  gem 'mocha',                   :require => false
-  # keep for its rake task for now
+  gem 'rspec-puppet',            :require => false
   gem 'puppetlabs_spec_helper',  :require => false
   gem 'puppet-lint',             :require => false
-  gem 'metadata-json-lint',      :require => false
   gem 'pry',                     :require => false
   gem 'simplecov',               :require => false
 end
@@ -32,10 +29,9 @@ group :system_tests do
   if beaker_rspec_version
     gem 'beaker-rspec', *location_for(beaker_rspec_version)
   else
-    gem 'beaker-rspec', :require => false
+    gem 'beaker-rspec',  :require => false
   end
-  gem 'serverspec', :require => false
-  gem 'beaker-puppet_install_helper', :require => false
+  gem 'serverspec',    :require => false
 end
 
 facterversion = ENV['GEM_FACTER_VERSION'] || ENV['FACTER_GEM_VERSION']

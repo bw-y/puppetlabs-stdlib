@@ -38,11 +38,8 @@ has_interface_with("lo")                        => true
     # Bug with 3.7.1 - 3.7.3  when using future parser throws :undefined_variable
     # https://tickets.puppetlabs.com/browse/PUP-3597
     factval = nil
-    begin
-      catch :undefined_variable do
-        factval = lookupvar(kind)
-      end
-    rescue Puppet::ParseError # Eat the exception if strict_variables = true is set
+    catch :undefined_variable do
+      factval = lookupvar(kind)
     end
     if factval == value
       return true

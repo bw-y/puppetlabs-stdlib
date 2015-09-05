@@ -1,29 +1,49 @@
+#! /usr/bin/env ruby -S rspec
 require 'spec_helper'
 
-describe 'validate_augeas' do
-  unless Puppet.features.augeas?
-    skip "ruby-augeas not installed"
-  else
-    describe 'signature validation' do
-      it { is_expected.not_to eq(nil) }
-      it { is_expected.to run.with_params().and_raise_error(Puppet::ParseError, /wrong number of arguments/i) }
-      it { is_expected.to run.with_params('').and_raise_error(Puppet::ParseError, /wrong number of arguments/i) }
-      it { is_expected.to run.with_params('', '', [], '', 'extra').and_raise_error(Puppet::ParseError, /wrong number of arguments/i) }
-      it { is_expected.to run.with_params('one', 'one', 'MSG to User', '4th arg').and_raise_error(NoMethodError) }
+describe Puppet::Parser::Functions.function(:validate_augeas), :if => Puppet.features.augeas? do
+  let(:scope) { PuppetlabsSpec::PuppetInternals.scope }
+
+  # The subject of these examplres is the method itself.
+  subject do
+    # This makes sure the function is loaded within each test
+    function_name = Puppet::Parser::Functions.function(:validate_augeas)
+    scope.method(function_name)
+  end
+
+  context 'Using Puppet::Parser::Scope.new' do
+
+    describe 'Garbage inputs' do
+      inputs = [
+        [ nil ],
+        [ [ nil ] ],
+        [ { 'foo' => 'bar' } ],
+        [ { } ],
+        [ '' ],
+        [ "one", "one", "MSG to User", "4th arg" ],
+      ]
+
+      inputs.each do |input|
+        it "validate_augeas(#{input.inspect}) should fail" do
+          expect { subject.call [input] }.to raise_error Puppet::ParseError
+        end
+      end
     end
 
-    describe 'valid inputs' do
+    describe 'Valid inputs' do
       inputs = [
         [ "root:x:0:0:root:/root:/bin/bash\n", 'Passwd.lns' ],
         [ "proc /proc   proc    nodev,noexec,nosuid     0       0\n", 'Fstab.lns'],
       ]
 
       inputs.each do |input|
-        it { is_expected.to run.with_params(*input) }
+        it "validate_augeas(#{input.inspect}) should not fail" do
+          expect { subject.call input }.not_to raise_error
+        end
       end
     end
 
-    describe 'valid inputs which fail augeas validation' do
+    describe "Valid inputs which should raise an exception without a message" do
       # The intent here is to make sure valid inputs raise exceptions when they
       # don't specify an error message to display.  This is the behvior in
       # 2.2.x and prior.
@@ -33,11 +53,13 @@ describe 'validate_augeas' do
       ]
 
       inputs.each do |input|
-        it { is_expected.to run.with_params(*input).and_raise_error(Puppet::ParseError, /validate_augeas.*?matched less than it should/) }
+        it "validate_augeas(#{input.inspect}) should fail" do
+          expect { subject.call input }.to raise_error /validate_augeas.*?matched less than it should/
+        end
       end
     end
 
-    describe "when specifying nice error messages" do
+    describe "Nicer Error Messages" do
       # The intent here is to make sure the function returns the 4th argument
       # in the exception thrown
       inputs = [
@@ -46,29 +68,35 @@ describe 'validate_augeas' do
       ]
 
       inputs.each do |input|
-        it { is_expected.to run.with_params(*input).and_raise_error(Puppet::ParseError, /#{input[3]}/) }
+        it "validate_augeas(#{input.inspect}) should fail" do
+          expect { subject.call input }.to raise_error /#{input[3]}/
+        end
       end
     end
 
-    describe "matching additional tests" do
+    describe "Passing simple unit tests" do
       inputs = [
         [ "root:x:0:0:root:/root:/bin/bash\n", 'Passwd.lns', ['$file/foobar']],
         [ "root:x:0:0:root:/root:/bin/bash\n", 'Passwd.lns', ['$file/root/shell[.="/bin/sh"]', 'foobar']],
       ]
 
       inputs.each do |input|
-        it { is_expected.to run.with_params(*input) }
+        it "validate_augeas(#{input.inspect}) should fail" do
+          expect { subject.call input }.not_to raise_error
+        end
       end
     end
 
-    describe "failing additional tests" do
+    describe "Failing simple unit tests" do
       inputs = [
         [ "foobar:x:0:0:root:/root:/bin/bash\n", 'Passwd.lns', ['$file/foobar']],
         [ "root:x:0:0:root:/root:/bin/sh\n", 'Passwd.lns', ['$file/root/shell[.="/bin/sh"]', 'foobar']],
       ]
 
       inputs.each do |input|
-        it { is_expected.to run.with_params(*input).and_raise_error(Puppet::ParseError, /testing path/) }
+        it "validate_augeas(#{input.inspect}) should fail" do
+          expect { subject.call input }.to raise_error /testing path/
+        end
       end
     end
   end

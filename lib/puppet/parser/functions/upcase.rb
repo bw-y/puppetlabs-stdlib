@@ -12,7 +12,7 @@ Converts a string or an array of strings to uppercase.
 
 Will return:
 
-    ABCD
+    ASDF
   EOS
   ) do |arguments|
 

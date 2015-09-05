@@ -71,7 +71,6 @@ module Puppet::Parser::Functions
       # check every element of the array
       input.each_with_index do |arg, pos|
         begin
-          raise TypeError if arg.is_a?(Hash)
           arg = Float(arg.to_s)
           validator.call(arg)
         rescue TypeError, ArgumentError
