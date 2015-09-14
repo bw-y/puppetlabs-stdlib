@@ -8,11 +8,8 @@
 #  * setup
 #  * main
 #  * runtime
-#  * setup_infra
-#  * deploy_infra
-#  * setup_app
-#  * deploy_app
-#  * deploy
+#  * jdk
+#  * jdk_app
 #
 # Parameters: none
 #
@@ -33,11 +30,10 @@
 class stdlib::stages {
 
   stage { 'setup':  before => Stage['main'] }
-  stage { 'runtime': require => Stage['main'] }
-  -> stage { 'setup_infra': }
-  -> stage { 'deploy_infra': }
-  -> stage { 'setup_app': }
-  -> stage { 'deploy_app': }
-  -> stage { 'deploy': }
+  stage { 'runtime': require => Stage['main'] } -> 
+  stage { 'db': } ->
+  stage { 'db_app': } -> 
+  stage { 'jdk': } -> 
+  stage { 'java_app': } 
 
 }
