@@ -371,6 +371,20 @@ Determine if a hash has a certain key value.
 
 This function converts an array into a hash. For example, `hash(['a',1,'b',2,'c',3])` returns {'a'=>1,'b'=>2,'c'=>3}. *Type*: rvalue
 
+#### `hash_merge`
+
+  *Example*
+  ```
+  *Examples:*
+  $ddd = {'t1' => 'aa', 't2' => 'ab'}
+  $ttt = {
+     'key_1' => { 't3' => 'a1'},
+     'key_2' => { 't1' => 'zz', 't3' => 'a8' }
+  }
+  $res = hash_merge($ttt, $ddd)
+  ```
+
+
 #### `intersection`
 
 This function returns an array an intersection of two. For example, `intersection(["a","b","c"],["b","c","d"])` returns ["b","c"].
